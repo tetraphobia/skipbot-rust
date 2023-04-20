@@ -1,3 +1,4 @@
+use modules::development::get_module_commands;
 use poise::serenity_prelude as serenity;
 
 mod events;
@@ -11,7 +12,7 @@ pub type Context<'a> = poise::Context<'a, Data, Error>;
 async fn main() {
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
-            commands: vec![modules::development::commands::ping::ping()],
+            commands: get_module_commands(),
             ..Default::default()
         })
         .token(std::env::var("DISCORD_TOKEN").expect("missing DISCORD_TOKEN"))
