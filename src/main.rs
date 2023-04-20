@@ -1,7 +1,6 @@
-use modules::development::get_module_commands;
+use modules::*;
 use poise::serenity_prelude as serenity;
 
-mod events;
 mod modules;
 
 pub struct Data {} // User data, which is stored and accessible in all command invocations
@@ -12,7 +11,7 @@ pub type Context<'a> = poise::Context<'a, Data, Error>;
 async fn main() {
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
-            commands: get_module_commands(),
+            commands: development::get_module_commands(),
             ..Default::default()
         })
         .token(std::env::var("DISCORD_TOKEN").expect("missing DISCORD_TOKEN"))
