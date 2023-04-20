@@ -2,8 +2,9 @@ use anyhow::anyhow;
 use serenity::prelude::*;
 use shuttle_secrets::SecretStore;
 
-mod commands;
 mod handler;
+mod modules;
+mod register;
 
 #[shuttle_runtime::main]
 async fn serenity(
