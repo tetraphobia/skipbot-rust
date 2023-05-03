@@ -10,7 +10,9 @@ pub type Error = Box<dyn std::error::Error + Send + Sync>;
 pub type Context<'a> = poise::Context<'a, Data, Error>;
 
 fn setup_logger() {
-    let colors = ColoredLevelConfig::new().debug(Color::Magenta);
+    let colors = ColoredLevelConfig::new()
+        .debug(Color::Magenta)
+        .info(Color::Blue);
 
     fern::Dispatch::new()
         .chain(std::io::stdout())
@@ -18,7 +20,6 @@ fn setup_logger() {
             out.finish(format_args!(
                 "[{} {} {}] {}",
                 humantime::format_rfc3339_seconds(SystemTime::now()),
-                // This will color the log level only, not the whole line. Just a touch.
                 colors.color(record.level()),
                 record.target(),
                 message
