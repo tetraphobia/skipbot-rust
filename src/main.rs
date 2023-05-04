@@ -56,7 +56,6 @@ fn setup_bot_framework() -> FrameworkResult {
 
 #[tokio::main]
 async fn main() {
-    // Setup logging
     match setup_logger() {
         Ok(_) => log::info!("Logger configured successfully"),
         Err(error) => {
@@ -65,7 +64,6 @@ async fn main() {
         }
     }
 
-    // Test database connection
     match db::establish_connection() {
         Ok(_) => log::info!("Database connection established"),
         Err(error) => {
@@ -74,7 +72,6 @@ async fn main() {
         }
     }
 
-    // Run bot framework
     let framework = setup_bot_framework();
     framework.run().await.unwrap();
 }
