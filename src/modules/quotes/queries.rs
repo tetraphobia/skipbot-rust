@@ -1,8 +1,12 @@
 use crate::db;
 use crate::db::entity::{quotes, quotes::Model};
 use migration::Expr;
-use poise::serenity_prelude::User;
-use sea_orm::{ActiveModelTrait, DbBackend, DbErr, EntityTrait, QueryOrder, Set, Statement};
+use poise::serenity_prelude::{guild, User};
+use rand::seq::SliceRandom;
+use sea_orm::{
+    ActiveModelTrait, ColumnTrait, DbBackend, DbErr, EntityTrait, QueryFilter, QueryTrait, Set,
+    Statement,
+};
 
 const FALLBACK_AVATAR_URL: &str =
     "https://www.gravatar.com/avatar/00000000000000000000000000000000";
@@ -38,23 +42,31 @@ pub async fn create_quote(
     }
 }
 
-pub async fn get_random_quote() -> Option<Model> {
+pub async fn get_random_quote(guild_id: String, author: Option<User>) -> Option<Model> {
     let conn = db::establish_connection().await.unwrap();
     log::info!("Picking random quote");
 
-    let quote = quotes::Entity::find()
-        .from_raw_sql(Statement::from_string(
-            DbBackend::Sqlite,
-            r#"SELECT * FROM quotes ORDER BY RANDOM() LIMIT 1"#.to_owned(),
-        ))
-        .one(&conn)
-        .await;
+    let author_name: String;
 
-    if let Err(e) = quote {
-        log::error!("Error while fetching random quote");
-        log::error!("{:#?}", e);
-        return None;
+    if let Some(author) = author {
+        author_name = author.name;
+    } else {
+        author_name = "".to_owned();
     }
 
-    quote.unwrap()
+    let quotes = quotes::Entity::find()
+        .filter(quotes::Column::GuildId.contains(&guild_id))
+        .filter(quotes::Column::Author.contains(&author_name))
+        .all(&conn)
+        .await
+        .unwrap();
+
+    if quotes.len() == 0 {
+        return None;
+    };
+
+    let picked = quotes.choose(&mut rand::thread_rng()).unwrap();
+
+    println!("{:?}", &picked);
+    Some(picked.to_owned())
 }

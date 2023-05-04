@@ -14,6 +14,7 @@ fn create_embed<'a>(embed: &'a mut CreateEmbed, quote: Model) -> &'a mut CreateE
         .description(quote.quote_string)
         .field("Date Added", quote.created_at.unwrap(), true)
         .field("Added By", quote.quoted_by, true)
+        .field("ID", quote.id, true)
 }
 
 /// Save a quote.
@@ -55,6 +56,7 @@ pub async fn inspireme(
 ) -> Result<(), Error> {
     log::info!("Received inspireme command from {}", ctx.author().name);
 
+    // Will be used for reading the quotes.
     let locale = locale.unwrap_or_else(|| {
         LOCALES
             .choose(&mut rand::thread_rng())
@@ -62,21 +64,27 @@ pub async fn inspireme(
             .clone()
             .to_string()
     });
-    let global = global.unwrap_or_else(|| false);
-    let quote;
 
-    if let Some(user) = author {
-        // Get a quote by a specific user
-        ctx.say("Not yet implemented").await?;
-        return Ok(());
-    } else {
-        quote = get_random_quote().await;
-    }
+    let guild_id: String = match global {
+        Some(global_search) => {
+            if !global_search {
+                ctx.guild_id().unwrap().to_string()
+            } else {
+                "".to_string()
+            }
+        }
+        _ => ctx.guild_id().unwrap().to_string(),
+    };
 
-    if let Some(quote) = quote {
-        ctx.send(|r| r.embed(|e| create_embed(e, quote)))
-            .await
-            .unwrap();
+    let quote = get_random_quote(guild_id, author).await;
+
+    match quote {
+        Some(quote) => {
+            ctx.send(|r| r.embed(|e| create_embed(e, quote))).await?;
+        }
+        _ => {
+            ctx.say("Something either went horribly wrong, or you have no quotes saved. Give the `/quote` command a try.").await?;
+        }
     }
     Ok(())
 }

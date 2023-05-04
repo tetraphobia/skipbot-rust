@@ -1,7 +1,7 @@
 use colored::Colorize;
 use fern::colors::{Color, ColoredLevelConfig};
 use migration::{Migrator, MigratorTrait};
-use modules::*;
+use modules::{quotes::queries::get_random_quote, *};
 use poise::{serenity_prelude as serenity, FrameworkBuilder};
 use std::time::SystemTime;
 
@@ -35,7 +35,7 @@ async fn setup_logger() -> Result<(), log::SetLoggerError> {
         .level(log::LevelFilter::Info)
         .level_for("tracing::span", log::LevelFilter::Warn)
         .level_for("serenity", log::LevelFilter::Warn)
-        .level_for("skipbot_rust", log::LevelFilter::Debug)
+        .level_for("skipbot_rust", log::LevelFilter::Info)
         .apply()
 }
 
