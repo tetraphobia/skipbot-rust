@@ -42,7 +42,7 @@ async fn setup_logger() -> Result<(), log::SetLoggerError> {
 async fn setup_bot_framework() -> FrameworkResult {
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
-            commands: development::get_module_commands(),
+            commands: get_enabled_commands(),
             ..Default::default()
         })
         .token(std::env::var("DISCORD_TOKEN").expect("missing DISCORD_TOKEN"))
