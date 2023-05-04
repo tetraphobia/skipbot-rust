@@ -1,5 +1,6 @@
 use colored::Colorize;
 use fern::colors::{Color, ColoredLevelConfig};
+use migration::{Migrator, MigratorTrait};
 use modules::*;
 use poise::{serenity_prelude as serenity, FrameworkBuilder};
 use std::time::SystemTime;
@@ -69,11 +70,21 @@ async fn main() {
         }
     }
 
+    // Database migration
     match db::establish_connection().await {
-        Ok(_) => log::info!("Database connection established"),
-        Err(error) => {
-            log::error!("Database connection failed");
-            log::error!("{}", error)
+        Ok(conn) => {
+            log::info!("Connection to database successful");
+
+            if let Err(e) = Migrator::up(&conn, None).await {
+                log::error!("Database migration failed");
+                log::error!("{}", e);
+            } else {
+                log::info!("Database migration successful")
+            }
+        }
+        Err(e) => {
+            log::error!("Connection to database failed");
+            log::error!("{}", e);
         }
     }
 

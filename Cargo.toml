@@ -18,3 +18,4 @@ log = "0.4.17"
 poise = "0.5.2"
 sea-orm = { version = "0.11.3", features = ["sqlx-sqlite", "runtime-tokio-rustls"] }
 tokio = { version = "1.27.0", features = ["rt-multi-thread", "process"] }
+migration = { path = "migration" }
