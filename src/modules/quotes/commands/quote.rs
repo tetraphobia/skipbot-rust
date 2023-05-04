@@ -2,7 +2,7 @@ use crate::db::entity::quotes::Model;
 use crate::modules::quotes::queries::*;
 use crate::{Context, Error};
 use poise::serenity_prelude::{self as serenity, CreateEmbed, User};
-use rand::seq::SliceRandom;
+// use rand::seq::SliceRandom;
 
 const LOCALES: [&str; 5] = ["en", "fr", "ja", "de", "zh-CN"];
 
@@ -49,7 +49,7 @@ pub async fn quote(
 pub async fn inspireme(
     ctx: Context<'_>,
     #[description = "Filter by user. (default: random)"] author: Option<serenity::User>,
-    #[description = "Specify a locale. (default: random)."] locale: Option<String>,
+    // #[description = "Specify a locale. (default: random)."] locale: Option<String>,
     #[description = "Allow pulling quotes from other servers. (default: false)."] global: Option<
         bool,
     >,
@@ -57,13 +57,13 @@ pub async fn inspireme(
     log::info!("Received inspireme command from {}", ctx.author().name);
 
     // Will be used for reading the quotes.
-    let locale = locale.unwrap_or_else(|| {
-        LOCALES
-            .choose(&mut rand::thread_rng())
-            .unwrap()
-            .clone()
-            .to_string()
-    });
+    // let locale = locale.unwrap_or_else(|| {
+    //     LOCALES
+    //         .choose(&mut rand::thread_rng())
+    //         .unwrap()
+    //         .clone()
+    //         .to_string()
+    // });
 
     let guild_id: String = match global {
         Some(global_search) => {

@@ -1,12 +1,8 @@
 use crate::db;
 use crate::db::entity::{quotes, quotes::Model};
-use migration::Expr;
-use poise::serenity_prelude::{guild, User};
+use poise::serenity_prelude::User;
 use rand::seq::SliceRandom;
-use sea_orm::{
-    ActiveModelTrait, ColumnTrait, DbBackend, DbErr, EntityTrait, QueryFilter, QueryTrait, Set,
-    Statement,
-};
+use sea_orm::*;
 
 const FALLBACK_AVATAR_URL: &str =
     "https://www.gravatar.com/avatar/00000000000000000000000000000000";

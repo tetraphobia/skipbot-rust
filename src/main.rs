@@ -1,7 +1,7 @@
 use colored::Colorize;
 use fern::colors::{Color, ColoredLevelConfig};
 use migration::{Migrator, MigratorTrait};
-use modules::{quotes::queries::get_random_quote, *};
+use modules::*;
 use poise::{serenity_prelude as serenity, FrameworkBuilder};
 use std::time::SystemTime;
 
