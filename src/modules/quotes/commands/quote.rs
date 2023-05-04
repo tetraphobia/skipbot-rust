@@ -1,7 +1,7 @@
 use crate::db::entity::quotes::Model;
 use crate::modules::quotes::queries::*;
 use crate::{Context, Error};
-use poise::serenity_prelude::{self as serenity, CreateEmbed};
+use poise::serenity_prelude::{self as serenity, CreateEmbed, User};
 use rand::seq::SliceRandom;
 
 const LOCALES: [&str; 5] = ["en", "fr", "ja", "de", "zh-CN"];
@@ -9,13 +9,9 @@ const LOCALES: [&str; 5] = ["en", "fr", "ja", "de", "zh-CN"];
 fn create_embed<'a>(embed: &'a mut CreateEmbed, quote: Model) -> &'a mut CreateEmbed {
     embed
         .color(0xe43a25)
-        .title("Archives of Wisdom")
-        .description(format!(
-            r#""{}"
-        
-        - {}"#,
-            quote.quote_string, quote.author
-        ))
+        .title(format!("Quoth the {}...", quote.author))
+        .thumbnail(quote.author_avatar_url)
+        .description(quote.quote_string)
         .field("Date Added", quote.created_at.unwrap(), true)
         .field("Added By", quote.quoted_by, true)
 }
@@ -32,11 +28,11 @@ pub async fn quote(
 
     log::debug!("{:#?}", u);
 
-    let (guild_id, quoted_by, quote_string, author): (String, String, String, String) = (
+    let (guild_id, quoted_by, quote_string, author): (String, String, String, User) = (
         ctx.guild_id().unwrap().to_string(),
         ctx.author().name.clone(),
         quote,
-        user.name.clone(),
+        user,
     );
 
     if let Ok(_) = create_quote(guild_id, quoted_by, quote_string, author).await {

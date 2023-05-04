@@ -10,6 +10,7 @@ pub struct Model {
     pub quoted_by: String,
     pub quote_string: String,
     pub author: String,
+    pub author_avatar_url: String,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

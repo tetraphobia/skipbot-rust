@@ -1,13 +1,17 @@
 use crate::db;
 use crate::db::entity::{quotes, quotes::Model};
 use migration::Expr;
+use poise::serenity_prelude::User;
 use sea_orm::{ActiveModelTrait, DbBackend, DbErr, EntityTrait, QueryOrder, Set, Statement};
+
+const FALLBACK_AVATAR_URL: &str =
+    "https://www.gravatar.com/avatar/00000000000000000000000000000000";
 
 pub async fn create_quote(
     guild_id: String,
     quoted_by: String,
     quote_string: String,
-    author: String,
+    user: User,
 ) -> Result<(), DbErr> {
     let conn = db::establish_connection().await?;
 
@@ -15,7 +19,10 @@ pub async fn create_quote(
         guild_id: Set(guild_id),
         quote_string: Set(quote_string),
         quoted_by: Set(quoted_by),
-        author: Set(author),
+        author: Set(user.name.to_owned()),
+        author_avatar_url: Set(user
+            .avatar_url()
+            .unwrap_or_else(|| FALLBACK_AVATAR_URL.to_string())),
         ..Default::default()
     };
 

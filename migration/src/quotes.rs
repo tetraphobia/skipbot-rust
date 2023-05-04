@@ -27,6 +27,7 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(Quote::QuotedBy).string().not_null())
                     .col(ColumnDef::new(Quote::QuoteString).string().not_null())
                     .col(ColumnDef::new(Quote::Author).string().not_null())
+                    .col(ColumnDef::new(Quote::AuthorAvatarUrl).string().not_null())
                     .to_owned(),
             )
             .await
@@ -49,6 +50,7 @@ enum Quote {
     QuotedBy,
     QuoteString,
     Author,
+    AuthorAvatarUrl,
 }
 
 impl Iden for Quote {
@@ -64,6 +66,7 @@ impl Iden for Quote {
                 Self::QuotedBy => "quoted_by",
                 Self::QuoteString => "quote_string",
                 Self::Author => "author",
+                Self::AuthorAvatarUrl => "author_avatar_url",
             }
         )
         .unwrap();
