@@ -1,14 +1,12 @@
-use diesel::prelude::*;
-use dotenv::dotenv;
+use sea_orm::prelude::*;
+use sea_orm::*;
 use std::env;
 
 pub mod models;
-pub mod schema;
 
-pub fn establish_connection() -> Result<SqliteConnection, ConnectionError> {
-    dotenv().ok();
+pub async fn establish_connection() -> Result<DatabaseConnection, DbErr> {
+    let url = env::var("DATABASE_URL").unwrap();
 
-    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL is not set");
-
-    SqliteConnection::establish(&database_url)
+    let opt = ConnectOptions::new(url);
+    Database::connect(opt).await
 }

@@ -1,3 +1,4 @@
+use colored::Colorize;
 use fern::colors::{Color, ColoredLevelConfig};
 use modules::*;
 use poise::{serenity_prelude as serenity, FrameworkBuilder};
@@ -13,7 +14,7 @@ pub type Context<'a> = poise::Context<'a, Data, Error>;
 type FrameworkResult =
     FrameworkBuilder<Data, Box<(dyn std::error::Error + std::marker::Send + Sync + 'static)>>;
 
-fn setup_logger() -> Result<(), log::SetLoggerError> {
+async fn setup_logger() -> Result<(), log::SetLoggerError> {
     let colors = ColoredLevelConfig::new()
         .debug(Color::Magenta)
         .info(Color::Blue);
@@ -22,20 +23,22 @@ fn setup_logger() -> Result<(), log::SetLoggerError> {
         .chain(std::io::stdout())
         .format(move |out, message, record| {
             out.finish(format_args!(
-                "[{} {} {}] {}",
-                humantime::format_rfc3339_seconds(SystemTime::now()),
+                "[{} {}] {}",
+                humantime::format_rfc3339_seconds(SystemTime::now())
+                    .to_string()
+                    .white(),
                 colors.color(record.level()),
-                record.target(),
                 message
             ))
         })
         .level(log::LevelFilter::Info)
         .level_for("tracing::span", log::LevelFilter::Warn)
         .level_for("serenity", log::LevelFilter::Warn)
+        .level_for("skipbot_rust", log::LevelFilter::Debug)
         .apply()
 }
 
-fn setup_bot_framework() -> FrameworkResult {
+async fn setup_bot_framework() -> FrameworkResult {
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
             commands: development::get_module_commands(),
@@ -56,7 +59,9 @@ fn setup_bot_framework() -> FrameworkResult {
 
 #[tokio::main]
 async fn main() {
-    match setup_logger() {
+    dotenv::dotenv().ok();
+
+    match setup_logger().await {
         Ok(_) => log::info!("Logger configured successfully"),
         Err(error) => {
             println!("Error while setting up logging");
@@ -64,7 +69,7 @@ async fn main() {
         }
     }
 
-    match db::establish_connection() {
+    match db::establish_connection().await {
         Ok(_) => log::info!("Database connection established"),
         Err(error) => {
             log::error!("Database connection failed");
@@ -72,6 +77,6 @@ async fn main() {
         }
     }
 
-    let framework = setup_bot_framework();
+    let framework = setup_bot_framework().await;
     framework.run().await.unwrap();
 }

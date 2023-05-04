@@ -1,3 +1,4 @@
+skipbot.db
 *.db
 .vscode/
 .env
