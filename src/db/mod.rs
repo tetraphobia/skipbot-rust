@@ -2,8 +2,6 @@ use sea_orm::prelude::*;
 use sea_orm::*;
 use std::env;
 
-pub mod models;
-
 pub async fn establish_connection() -> Result<DatabaseConnection, DbErr> {
     let url = env::var("DATABASE_URL").unwrap();
 
