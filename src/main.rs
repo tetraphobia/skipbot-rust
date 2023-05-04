@@ -1,15 +1,19 @@
 use fern::colors::{Color, ColoredLevelConfig};
 use modules::*;
-use poise::serenity_prelude as serenity;
+use poise::{serenity_prelude as serenity, FrameworkBuilder};
 use std::time::SystemTime;
 
+mod db;
 mod modules;
 
 pub struct Data {} // User data, which is stored and accessible in all command invocations
 pub type Error = Box<dyn std::error::Error + Send + Sync>;
 pub type Context<'a> = poise::Context<'a, Data, Error>;
 
-fn setup_logger() {
+type FrameworkResult =
+    FrameworkBuilder<Data, Box<(dyn std::error::Error + std::marker::Send + Sync + 'static)>>;
+
+fn setup_logger() -> Result<(), log::SetLoggerError> {
     let colors = ColoredLevelConfig::new()
         .debug(Color::Magenta)
         .info(Color::Blue);
@@ -29,13 +33,9 @@ fn setup_logger() {
         .level_for("tracing::span", log::LevelFilter::Warn)
         .level_for("serenity", log::LevelFilter::Warn)
         .apply()
-        .unwrap();
 }
 
-#[tokio::main]
-async fn main() {
-    setup_logger();
-
+fn setup_bot_framework() -> FrameworkResult {
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
             commands: development::get_module_commands(),
@@ -50,6 +50,31 @@ async fn main() {
             })
         });
 
-    log::info!("Skipbot framework initialized");
+    log::info!("Framework successfully initialized");
+    framework
+}
+
+#[tokio::main]
+async fn main() {
+    // Setup logging
+    match setup_logger() {
+        Ok(_) => log::info!("Logger configured successfully"),
+        Err(error) => {
+            println!("Error while setting up logging");
+            println!("{}", error)
+        }
+    }
+
+    // Test database connection
+    match db::establish_connection() {
+        Ok(_) => log::info!("Database connection established"),
+        Err(error) => {
+            log::error!("Database connection failed");
+            log::error!("{}", error)
+        }
+    }
+
+    // Run bot framework
+    let framework = setup_bot_framework();
     framework.run().await.unwrap();
 }

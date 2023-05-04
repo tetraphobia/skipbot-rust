@@ -1,0 +1,7 @@
+CREATE TABLE quotes (
+    id INTEGER NOT NULL PRIMARY KEY,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    quoted_by VARCHAR NOT NULL,
+    quote_string TEXT NOT NULL,
+    author VARCHAR NOT NULL
+)
