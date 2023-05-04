@@ -1,6 +1,7 @@
 use crate::db;
-use crate::db::entity::quotes;
-use sea_orm::{ActiveModelTrait, DbErr, Set};
+use crate::db::entity::{quotes, quotes::Model};
+use migration::Expr;
+use sea_orm::{ActiveModelTrait, DbBackend, DbErr, EntityTrait, QueryOrder, Set, Statement};
 
 pub async fn create_quote(
     guild_id: String,
@@ -28,4 +29,25 @@ pub async fn create_quote(
             Err(e)
         }
     }
+}
+
+pub async fn get_random_quote() -> Option<Model> {
+    let conn = db::establish_connection().await.unwrap();
+    log::info!("Picking random quote");
+
+    let quote = quotes::Entity::find()
+        .from_raw_sql(Statement::from_string(
+            DbBackend::Sqlite,
+            r#"SELECT * FROM quotes ORDER BY RANDOM() LIMIT 1"#.to_owned(),
+        ))
+        .one(&conn)
+        .await;
+
+    if let Err(e) = quote {
+        log::error!("Error while fetching random quote");
+        log::error!("{:#?}", e);
+        return None;
+    }
+
+    quote.unwrap()
 }
